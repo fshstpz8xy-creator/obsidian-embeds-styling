@@ -1,0 +1,10 @@
+{
+  "id": "regex-embed-styling",
+  "name": "Regex Embed Styling",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Style embeds as callouts based on customizable regex patterns",
+  "author": "Eleanor Cross",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}

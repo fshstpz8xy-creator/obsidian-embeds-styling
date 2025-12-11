@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+*.js.map
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Obsidian plugin data
+data.json
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Backup files
+*2.ts
+*2.js
+*2.css
+*2.json
