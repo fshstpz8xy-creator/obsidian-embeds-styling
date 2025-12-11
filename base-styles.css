@@ -1,0 +1,44 @@
+/* ============================================================================
+   REGEX EMBED STYLING - MINIMAL BASE STYLES
+   ONLY: Colored sidebar + icon. NO OTHER STYLING.
+   ============================================================================ */
+
+/* Styled embeds - positioning for sidebar */
+.markdown-embed.regex-embed-styled {
+	position: relative;
+}
+
+/* Ensure embed content container has proper positioning */
+.markdown-embed.regex-embed-styled .markdown-embed-content {
+	position: relative;
+}
+
+/* Colored sidebar (left bar) */
+.markdown-embed.regex-embed-styled::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 4px;
+	background-color: var(--embed-sidebar-color, #666);
+	z-index: 10;
+}
+
+/* Icon in title - base sizing for custom mode icons (only when title exists) */
+.markdown-embed.regex-embed-styled .markdown-embed-title::before {
+	display: inline-block;
+	width: 1.2em;
+	height: 1.2em;
+	margin-right: 0.5em;
+	vertical-align: middle;
+}
+
+/* For block/heading embeds without title - ensure minimum height for left bar visibility */
+.markdown-embed.regex-embed-styled:not(:has(.markdown-embed-title)) {
+	min-height: 2em;
+}
+
+/* ============================================================================
+   DYNAMIC RULE-SPECIFIC STYLES (APPENDED BY PLUGIN)
+   ============================================================================ */

@@ -564,6 +564,11 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
 	mask: none !important;
 	-webkit-mask: none !important;
 }
+
+/* Content padding for embeds without title (block/heading embeds) */
+.markdown-embed.regex-embed-styled[data-embed-rule="${rule.id}"]:not(:has(.markdown-embed-title)) .markdown-embed-content {
+	padding-top: var(--callout-padding, 8px);
+}
 `;
       } else {
         css += `
