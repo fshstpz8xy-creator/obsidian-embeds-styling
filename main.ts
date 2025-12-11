@@ -385,6 +385,29 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 		return false;
 	}
 
+	/**
+	 * Ensure embed has a title element for badge display.
+	 * Creates one if missing (for block/heading embeds).
+	 */
+	ensureEmbedTitle(embed: HTMLElement): HTMLElement | null {
+		let title = embed.querySelector('.markdown-embed-title') as HTMLElement;
+
+		if (!title) {
+			// Check if this embed has content (block/heading embeds do)
+			const content = embed.querySelector('.markdown-embed-content');
+			if (!content) return null;
+
+			// Create title element
+			title = document.createElement('div');
+			title.className = 'markdown-embed-title';
+
+			// Insert before content
+			content.parentElement?.insertBefore(title, content);
+		}
+
+		return title;
+	}
+
 	processEmbed(embed: HTMLElement) {
 		const src = embed.getAttribute('src');
 		if (!src) return;
@@ -393,6 +416,11 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 		if (this.shouldExcludeEmbed(embed)) {
 			embed.removeAttribute('data-embed-rule');
 			embed.classList.remove('regex-embed-styled');
+			// Remove any injected title if present
+			const injectedTitle = embed.querySelector('.markdown-embed-title:empty');
+			if (injectedTitle && !injectedTitle.hasChildNodes()) {
+				injectedTitle.remove();
+			}
 			return;
 		}
 
@@ -407,6 +435,9 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 				if (regex.test(src)) {
 					embed.setAttribute('data-embed-rule', rule.id);
 					embed.classList.add('regex-embed-styled');
+
+					// Ensure title element exists for badge display
+					this.ensureEmbedTitle(embed);
 					break;
 				}
 			} catch (e) {

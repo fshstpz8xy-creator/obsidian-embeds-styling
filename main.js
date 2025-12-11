@@ -383,6 +383,23 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
     }
     return false;
   }
+  /**
+   * Ensure embed has a title element for badge display.
+   * Creates one if missing (for block/heading embeds).
+   */
+  ensureEmbedTitle(embed) {
+    var _a;
+    let title = embed.querySelector(".markdown-embed-title");
+    if (!title) {
+      const content = embed.querySelector(".markdown-embed-content");
+      if (!content)
+        return null;
+      title = document.createElement("div");
+      title.className = "markdown-embed-title";
+      (_a = content.parentElement) == null ? void 0 : _a.insertBefore(title, content);
+    }
+    return title;
+  }
   processEmbed(embed) {
     const src = embed.getAttribute("src");
     if (!src)
@@ -390,6 +407,10 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
     if (this.shouldExcludeEmbed(embed)) {
       embed.removeAttribute("data-embed-rule");
       embed.classList.remove("regex-embed-styled");
+      const injectedTitle = embed.querySelector(".markdown-embed-title:empty");
+      if (injectedTitle && !injectedTitle.hasChildNodes()) {
+        injectedTitle.remove();
+      }
       return;
     }
     embed.removeAttribute("data-embed-rule");
@@ -402,6 +423,7 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
         if (regex.test(src)) {
           embed.setAttribute("data-embed-rule", rule.id);
           embed.classList.add("regex-embed-styled");
+          this.ensureEmbedTitle(embed);
           break;
         }
       } catch (e) {
