@@ -353,9 +353,48 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 		});
 	}
 
+	/**
+	 * Check if embed should be excluded from styling based on metadata flag.
+	 * Supports ![[link|plain]] syntax (case-insensitive).
+	 */
+	shouldExcludeEmbed(embed: HTMLElement): boolean {
+		// Check alt attribute (Obsidian may store display text here)
+		const alt = embed.getAttribute('alt');
+		if (alt && alt.toLowerCase().trim() === 'plain') {
+			return true;
+		}
+
+		// Check for markdown-embed-link element with display text
+		const embedLink = embed.querySelector('.markdown-embed-link');
+		if (embedLink) {
+			const linkText = embedLink.textContent?.toLowerCase().trim();
+			if (linkText === 'plain') {
+				return true;
+			}
+		}
+
+		// Check for internal-embed link with aria-label
+		const internalLink = embed.querySelector('.internal-embed');
+		if (internalLink) {
+			const ariaLabel = internalLink.getAttribute('aria-label');
+			if (ariaLabel && ariaLabel.toLowerCase().includes('|plain')) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	processEmbed(embed: HTMLElement) {
 		const src = embed.getAttribute('src');
 		if (!src) return;
+
+		// Check if embed should be excluded from styling
+		if (this.shouldExcludeEmbed(embed)) {
+			embed.removeAttribute('data-embed-rule');
+			embed.classList.remove('regex-embed-styled');
+			return;
+		}
 
 		embed.removeAttribute('data-embed-rule');
 		embed.classList.remove('regex-embed-styled');

@@ -357,10 +357,41 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
       this.processEmbed(embed);
     });
   }
+  /**
+   * Check if embed should be excluded from styling based on metadata flag.
+   * Supports ![[link|plain]] syntax (case-insensitive).
+   */
+  shouldExcludeEmbed(embed) {
+    var _a;
+    const alt = embed.getAttribute("alt");
+    if (alt && alt.toLowerCase().trim() === "plain") {
+      return true;
+    }
+    const embedLink = embed.querySelector(".markdown-embed-link");
+    if (embedLink) {
+      const linkText = (_a = embedLink.textContent) == null ? void 0 : _a.toLowerCase().trim();
+      if (linkText === "plain") {
+        return true;
+      }
+    }
+    const internalLink = embed.querySelector(".internal-embed");
+    if (internalLink) {
+      const ariaLabel = internalLink.getAttribute("aria-label");
+      if (ariaLabel && ariaLabel.toLowerCase().includes("|plain")) {
+        return true;
+      }
+    }
+    return false;
+  }
   processEmbed(embed) {
     const src = embed.getAttribute("src");
     if (!src)
       return;
+    if (this.shouldExcludeEmbed(embed)) {
+      embed.removeAttribute("data-embed-rule");
+      embed.classList.remove("regex-embed-styled");
+      return;
+    }
     embed.removeAttribute("data-embed-rule");
     embed.classList.remove("regex-embed-styled");
     for (const rule of this.settings.rules) {
