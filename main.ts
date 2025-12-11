@@ -372,9 +372,23 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 	 * Supports ![[link|plain]] syntax (case-insensitive).
 	 */
 	shouldExcludeEmbed(embed: HTMLElement): boolean {
+		// Primary check: Look for data-plain attribute that we set ourselves
+		if (embed.hasAttribute('data-plain')) {
+			return true;
+		}
+
+		// Check src attribute for |plain suffix
+		const src = embed.getAttribute('src');
+		if (src && src.toLowerCase().includes('|plain')) {
+			// Mark this embed for future quick checks
+			embed.setAttribute('data-plain', 'true');
+			return true;
+		}
+
 		// Check alt attribute (Obsidian may store display text here)
 		const alt = embed.getAttribute('alt');
 		if (alt && alt.toLowerCase().trim() === 'plain') {
+			embed.setAttribute('data-plain', 'true');
 			return true;
 		}
 
@@ -383,6 +397,7 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 		if (embedLink) {
 			const linkText = embedLink.textContent?.toLowerCase().trim();
 			if (linkText === 'plain') {
+				embed.setAttribute('data-plain', 'true');
 				return true;
 			}
 		}
@@ -392,6 +407,7 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 		if (internalLink) {
 			const ariaLabel = internalLink.getAttribute('aria-label');
 			if (ariaLabel && ariaLabel.toLowerCase().includes('|plain')) {
+				embed.setAttribute('data-plain', 'true');
 				return true;
 			}
 		}

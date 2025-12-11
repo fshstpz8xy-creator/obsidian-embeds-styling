@@ -379,14 +379,24 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
    */
   shouldExcludeEmbed(embed) {
     var _a;
+    if (embed.hasAttribute("data-plain")) {
+      return true;
+    }
+    const src = embed.getAttribute("src");
+    if (src && src.toLowerCase().includes("|plain")) {
+      embed.setAttribute("data-plain", "true");
+      return true;
+    }
     const alt = embed.getAttribute("alt");
     if (alt && alt.toLowerCase().trim() === "plain") {
+      embed.setAttribute("data-plain", "true");
       return true;
     }
     const embedLink = embed.querySelector(".markdown-embed-link");
     if (embedLink) {
       const linkText = (_a = embedLink.textContent) == null ? void 0 : _a.toLowerCase().trim();
       if (linkText === "plain") {
+        embed.setAttribute("data-plain", "true");
         return true;
       }
     }
@@ -394,6 +404,7 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
     if (internalLink) {
       const ariaLabel = internalLink.getAttribute("aria-label");
       if (ariaLabel && ariaLabel.toLowerCase().includes("|plain")) {
+        embed.setAttribute("data-plain", "true");
         return true;
       }
     }

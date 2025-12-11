@@ -39,6 +39,20 @@
 	min-height: 2em;
 }
 
+/* Exclude embeds with |plain metadata flag */
+.markdown-embed[data-plain] {
+	/* Reset all styling */
+	--embed-sidebar-color: transparent !important;
+}
+
+.markdown-embed[data-plain]::before {
+	display: none !important;
+}
+
+.markdown-embed[data-plain] .markdown-embed-title::before {
+	display: none !important;
+}
+
 /* ============================================================================
    DYNAMIC RULE-SPECIFIC STYLES (APPENDED BY PLUGIN)
    ============================================================================ */
