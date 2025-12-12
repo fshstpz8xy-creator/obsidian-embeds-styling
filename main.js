@@ -682,30 +682,33 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
           const callout = CALLOUT_DEFINITIONS[rule.calloutType];
           const colorValue = callout.color.startsWith("var(") ? `rgb(${callout.color})` : `rgb(${callout.color})`;
           const textColor = callout.textColor || "#fff";
-          const badgeLabel = rule.customLabel || callout.label;
           css += `
 /* Link highlighting: ${rule.name} */
 .internal-link.regex-link-styled[data-link-rule="${rule.id}"] {
 	background-color: ${colorValue};
 	color: ${textColor};
 	padding: 2px 8px;
+	padding-left: 24px;
 	border-radius: 4px;
 	text-decoration: none;
-	font-size: 0.85em;
 	font-weight: 600;
 	white-space: nowrap;
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
+	display: inline-block;
+	position: relative;
 }
 
 .internal-link.regex-link-styled[data-link-rule="${rule.id}"]::before {
-	content: "${badgeLabel}";
-	font-size: 0.75em;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	opacity: 0.9;
+	content: '';
+	position: absolute;
+	left: 6px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 14px;
+	height: 14px;
+	background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(callout.icon.replace("currentColor", textColor)).replace(/'/g, "%27")}');
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
 }
 
 .internal-link.regex-link-styled[data-link-rule="${rule.id}"]:hover {
@@ -720,12 +723,42 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
 	background-color: ${rule.color};
 	color: #fff;
 	padding: 2px 8px;
+	padding-left: ${rule.iconType === "svg" ? "24px" : "26px"};
 	border-radius: 4px;
 	text-decoration: none;
-	font-size: 0.85em;
 	font-weight: 600;
 	white-space: nowrap;
+	display: inline-block;
+	position: relative;
 }
+
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"]::before {
+`;
+          if (rule.iconType === "svg") {
+            css += `	content: '';
+	position: absolute;
+	left: 6px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 14px;
+	height: 14px;
+	background-color: #fff;
+	mask-image: url('data:image/svg+xml;utf8,${encodeURIComponent(rule.icon).replace(/'/g, "%27")}');
+	mask-size: contain;
+	mask-repeat: no-repeat;
+	mask-position: center;
+`;
+          } else {
+            css += `	content: '${rule.icon}';
+	position: absolute;
+	left: 6px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 14px;
+	line-height: 1;
+`;
+          }
+          css += `}
 
 .internal-link.regex-link-styled[data-link-rule="${rule.id}"]:hover {
 	opacity: 0.9;
