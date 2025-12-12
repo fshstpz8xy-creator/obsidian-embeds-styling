@@ -471,8 +471,9 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
   }
   processLink(link) {
     const href = link.getAttribute("href") || link.getAttribute("data-href") || "";
-    if (!href || href.startsWith("!"))
+    if (href.startsWith("!"))
       return;
+    const linkText = link.textContent || "";
     link.removeAttribute("data-link-rule");
     link.classList.remove("regex-link-styled");
     for (const rule of this.settings.rules) {
@@ -480,7 +481,7 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
         continue;
       try {
         const regex = new RegExp(rule.pattern, "i");
-        if (regex.test(href)) {
+        if (regex.test(linkText) || regex.test(href)) {
           link.setAttribute("data-link-rule", rule.id);
           link.classList.add("regex-link-styled");
           break;

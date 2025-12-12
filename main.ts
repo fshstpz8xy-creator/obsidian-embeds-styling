@@ -496,7 +496,10 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 	processLink(link: HTMLElement) {
 		// Skip if this is a transclusion link (embed)
 		const href = link.getAttribute('href') || link.getAttribute('data-href') || '';
-		if (!href || href.startsWith('!')) return;
+		if (href.startsWith('!')) return;
+
+		// Get link text content for matching
+		const linkText = link.textContent || '';
 
 		// Remove any previous styling
 		link.removeAttribute('data-link-rule');
@@ -508,7 +511,8 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 
 			try {
 				const regex = new RegExp(rule.pattern, 'i');
-				if (regex.test(href)) {
+				// Test against both link text and href
+				if (regex.test(linkText) || regex.test(href)) {
 					link.setAttribute('data-link-rule', rule.id);
 					link.classList.add('regex-link-styled');
 					break;
