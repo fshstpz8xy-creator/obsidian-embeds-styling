@@ -19,6 +19,8 @@ interface EmbedRule {
 	// Callout-pinned styling fields
 	calloutType?: string;
 	customLabel?: string; // Optional custom label text for callout badge
+	// Link highlighting
+	highlightLinks?: boolean; // Enable badge-style highlighting for matching normal links
 }
 
 // ============================================================================
@@ -344,11 +346,20 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 			mutations.forEach((mutation) => {
 				mutation.addedNodes.forEach((node) => {
 					if (node instanceof HTMLElement) {
+						// Process embeds
 						if (node.classList.contains('markdown-embed')) {
 							this.processEmbed(node);
 						}
 						node.querySelectorAll('.markdown-embed').forEach((embed) => {
 							this.processEmbed(embed as HTMLElement);
+						});
+
+						// Process links
+						if (node.classList.contains('internal-link')) {
+							this.processLink(node);
+						}
+						node.querySelectorAll('.internal-link').forEach((link) => {
+							this.processLink(link as HTMLElement);
 						});
 					}
 				});
@@ -364,6 +375,12 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 	processExistingEmbeds() {
 		document.querySelectorAll('.markdown-embed').forEach((embed) => {
 			this.processEmbed(embed as HTMLElement);
+		});
+	}
+
+	processExistingLinks() {
+		document.querySelectorAll('.internal-link').forEach((link) => {
+			this.processLink(link as HTMLElement);
 		});
 	}
 
@@ -468,6 +485,32 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 
 					// Ensure title element exists for badge display
 					this.ensureEmbedTitle(embed);
+					break;
+				}
+			} catch (e) {
+				console.error(`Invalid regex pattern for rule "${rule.name}":`, e);
+			}
+		}
+	}
+
+	processLink(link: HTMLElement) {
+		// Skip if this is a transclusion link (embed)
+		const href = link.getAttribute('href') || link.getAttribute('data-href') || '';
+		if (!href || href.startsWith('!')) return;
+
+		// Remove any previous styling
+		link.removeAttribute('data-link-rule');
+		link.classList.remove('regex-link-styled');
+
+		// Check against enabled rules with link highlighting enabled
+		for (const rule of this.settings.rules) {
+			if (!rule.enabled || !rule.highlightLinks) continue;
+
+			try {
+				const regex = new RegExp(rule.pattern, 'i');
+				if (regex.test(href)) {
+					link.setAttribute('data-link-rule', rule.id);
+					link.classList.add('regex-link-styled');
 					break;
 				}
 			} catch (e) {
@@ -694,6 +737,70 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 
 				css += `}
 `;
+			}
+
+			// Generate link highlighting CSS if enabled for this rule
+			if (rule.highlightLinks) {
+				// Handle callout-pinned mode for links
+				if (rule.styleMode === 'callout' && rule.calloutType && CALLOUT_DEFINITIONS[rule.calloutType]) {
+					const callout = CALLOUT_DEFINITIONS[rule.calloutType];
+					const colorValue = callout.color.startsWith('var(')
+						? `rgb(${callout.color})`
+						: `rgb(${callout.color})`;
+					const textColor = callout.textColor || '#fff';
+					const badgeLabel = rule.customLabel || callout.label;
+
+					css += `
+/* Link highlighting: ${rule.name} */
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"] {
+	background-color: ${colorValue};
+	color: ${textColor};
+	padding: 2px 8px;
+	border-radius: 4px;
+	text-decoration: none;
+	font-size: 0.85em;
+	font-weight: 600;
+	white-space: nowrap;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"]::before {
+	content: "${badgeLabel}";
+	font-size: 0.75em;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	opacity: 0.9;
+}
+
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"]:hover {
+	opacity: 0.9;
+	filter: brightness(1.1);
+}
+`;
+				} else {
+					// Custom mode link highlighting
+					css += `
+/* Link highlighting: ${rule.name} */
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"] {
+	background-color: ${rule.color};
+	color: #fff;
+	padding: 2px 8px;
+	border-radius: 4px;
+	text-decoration: none;
+	font-size: 0.85em;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"]:hover {
+	opacity: 0.9;
+	filter: brightness(1.1);
+}
+`;
+				}
 			}
 		}
 
@@ -1209,6 +1316,19 @@ class RegexEmbedSettingTab extends PluginSettingTab {
 					return text;
 				});
 			}
+
+			// Link highlighting toggle (available for all rules)
+			new Setting(ruleContainer)
+				.setName('Highlight matching links')
+				.setDesc('Apply badge/pill styling to normal links (not embeds) that match this pattern')
+				.addToggle(toggle => toggle
+					.setValue(rule.highlightLinks || false)
+					.onChange(async (value) => {
+						rule.highlightLinks = value;
+						await this.plugin.saveSettings();
+						await this.plugin.updateStyles();
+						this.plugin.processExistingLinks();
+					}));
 
 			new Setting(ruleContainer)
 				.addButton(button => button

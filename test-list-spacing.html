@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List Spacing Test</title>
+    <style>
+        /* Simulate Obsidian's embed structure */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #252525;
+            border: 1px solid #404040;
+        }
+
+        h2 {
+            color: #4fc3f7;
+            margin-top: 0;
+        }
+
+        /* CURRENT PLUGIN CSS - Base styles */
+        .markdown-embed {
+            border: 2px solid #666;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .markdown-embed-content {
+            padding: 0;
+        }
+
+        .markdown-embed-content > .markdown-preview-view {
+            padding: 10px;
+        }
+
+        /* PROBLEM CSS - What's breaking lists */
+        .markdown-embed-content ul,
+        .markdown-embed-content ol {
+            /* Test different values here */
+        }
+
+        .markdown-embed-content li {
+            /* Test different values here */
+        }
+
+        /* FIX ATTEMPT 1: Default browser styling */
+        .fix-1 .markdown-embed-content ul,
+        .fix-1 .markdown-embed-content ol {
+            list-style-position: outside;
+            padding-left: 40px;
+        }
+
+        /* FIX ATTEMPT 2: Force with !important */
+        .fix-2 .markdown-embed-content ul,
+        .fix-2 .markdown-embed-content ol {
+            list-style-position: outside !important;
+            padding-left: 40px !important;
+        }
+
+        .fix-2 .markdown-embed-content li {
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        /* FIX ATTEMPT 3: Add padding to li for spacing */
+        .fix-3 .markdown-embed-content ul,
+        .fix-3 .markdown-embed-content ol {
+            list-style-position: inside !important;
+            padding-left: 0 !important;
+        }
+
+        .fix-3 .markdown-embed-content li {
+            padding-left: 10px !important;
+        }
+
+        /* FIX ATTEMPT 4: Use ::marker for spacing */
+        .fix-4 .markdown-embed-content ul,
+        .fix-4 .markdown-embed-content ol {
+            list-style-position: outside !important;
+            padding-left: 40px !important;
+        }
+
+        .fix-4 .markdown-embed-content li::marker {
+            unicode-bidi: isolate;
+            font-variant-numeric: tabular-nums;
+            text-transform: none;
+            text-indent: 0;
+            text-align: start;
+            text-align-last: start;
+        }
+    </style>
+</head>
+<body>
+    <h1>Obsidian List Spacing Test</h1>
+
+    <div class="test-section">
+        <h2>Control: No CSS Applied</h2>
+        <div class="markdown-embed">
+            <div class="markdown-embed-content">
+                <div class="markdown-preview-view">
+                    <ul>
+                        <li>First item with some text</li>
+                        <li>Second item with more text</li>
+                        <li>Third item</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section fix-1">
+        <h2>Fix 1: list-style-position: outside + padding-left: 40px</h2>
+        <div class="markdown-embed">
+            <div class="markdown-embed-content">
+                <div class="markdown-preview-view">
+                    <ul>
+                        <li>First item with some text</li>
+                        <li>Second item with more text</li>
+                        <li>Third item</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section fix-2">
+        <h2>Fix 2: Same as Fix 1 but with !important</h2>
+        <div class="markdown-embed">
+            <div class="markdown-embed-content">
+                <div class="markdown-preview-view">
+                    <ul>
+                        <li>First item with some text</li>
+                        <li>Second item with more text</li>
+                        <li>Third item</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section fix-3">
+        <h2>Fix 3: list-style-position: inside + li padding</h2>
+        <div class="markdown-embed">
+            <div class="markdown-embed-content">
+                <div class="markdown-preview-view">
+                    <ul>
+                        <li>First item with some text</li>
+                        <li>Second item with more text</li>
+                        <li>Third item</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section fix-4">
+        <h2>Fix 4: ::marker pseudo-element approach</h2>
+        <div class="markdown-embed">
+            <div class="markdown-embed-content">
+                <div class="markdown-preview-view">
+                    <ul>
+                        <li>First item with some text</li>
+                        <li>Second item with more text</li>
+                        <li>Third item</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test: What if we strip ALL padding/margins?</h2>
+        <div class="markdown-embed">
+            <div class="markdown-embed-content">
+                <div class="markdown-preview-view">
+                    <ul style="padding: 0; margin: 0;">
+                        <li style="padding: 0; margin: 0;">First item with some text</li>
+                        <li style="padding: 0; margin: 0;">Second item with more text</li>
+                        <li style="padding: 0; margin: 0;">Third item</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Result Analysis</h2>
+        <p>Open this file in a browser and compare the different approaches.</p>
+        <p>The winning approach should show:</p>
+        <ul>
+            <li>✓ Bullets visible and properly aligned</li>
+            <li>✓ Clear space between bullet and text</li>
+            <li>✓ Proper indentation for the list</li>
+        </ul>
+    </div>
+</body>
+</html>

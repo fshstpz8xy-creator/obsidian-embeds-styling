@@ -359,6 +359,12 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
             node.querySelectorAll(".markdown-embed").forEach((embed) => {
               this.processEmbed(embed);
             });
+            if (node.classList.contains("internal-link")) {
+              this.processLink(node);
+            }
+            node.querySelectorAll(".internal-link").forEach((link) => {
+              this.processLink(link);
+            });
           }
         });
       });
@@ -371,6 +377,11 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
   processExistingEmbeds() {
     document.querySelectorAll(".markdown-embed").forEach((embed) => {
       this.processEmbed(embed);
+    });
+  }
+  processExistingLinks() {
+    document.querySelectorAll(".internal-link").forEach((link) => {
+      this.processLink(link);
     });
   }
   /**
@@ -451,6 +462,27 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
           embed.setAttribute("data-embed-rule", rule.id);
           embed.classList.add("regex-embed-styled");
           this.ensureEmbedTitle(embed);
+          break;
+        }
+      } catch (e) {
+        console.error(`Invalid regex pattern for rule "${rule.name}":`, e);
+      }
+    }
+  }
+  processLink(link) {
+    const href = link.getAttribute("href") || link.getAttribute("data-href") || "";
+    if (!href || href.startsWith("!"))
+      return;
+    link.removeAttribute("data-link-rule");
+    link.classList.remove("regex-link-styled");
+    for (const rule of this.settings.rules) {
+      if (!rule.enabled || !rule.highlightLinks)
+        continue;
+      try {
+        const regex = new RegExp(rule.pattern, "i");
+        if (regex.test(href)) {
+          link.setAttribute("data-link-rule", rule.id);
+          link.classList.add("regex-link-styled");
           break;
         }
       } catch (e) {
@@ -644,6 +676,63 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
         }
         css += `}
 `;
+      }
+      if (rule.highlightLinks) {
+        if (rule.styleMode === "callout" && rule.calloutType && CALLOUT_DEFINITIONS[rule.calloutType]) {
+          const callout = CALLOUT_DEFINITIONS[rule.calloutType];
+          const colorValue = callout.color.startsWith("var(") ? `rgb(${callout.color})` : `rgb(${callout.color})`;
+          const textColor = callout.textColor || "#fff";
+          const badgeLabel = rule.customLabel || callout.label;
+          css += `
+/* Link highlighting: ${rule.name} */
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"] {
+	background-color: ${colorValue};
+	color: ${textColor};
+	padding: 2px 8px;
+	border-radius: 4px;
+	text-decoration: none;
+	font-size: 0.85em;
+	font-weight: 600;
+	white-space: nowrap;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"]::before {
+	content: "${badgeLabel}";
+	font-size: 0.75em;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	opacity: 0.9;
+}
+
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"]:hover {
+	opacity: 0.9;
+	filter: brightness(1.1);
+}
+`;
+        } else {
+          css += `
+/* Link highlighting: ${rule.name} */
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"] {
+	background-color: ${rule.color};
+	color: #fff;
+	padding: 2px 8px;
+	border-radius: 4px;
+	text-decoration: none;
+	font-size: 0.85em;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.internal-link.regex-link-styled[data-link-rule="${rule.id}"]:hover {
+	opacity: 0.9;
+	filter: brightness(1.1);
+}
+`;
+        }
       }
     }
     const enabledRules = this.settings.rules.filter((r) => r.enabled);
@@ -984,6 +1073,12 @@ var RegexEmbedSettingTab = class extends import_obsidian2.PluginSettingTab {
           return text;
         });
       }
+      new import_obsidian2.Setting(ruleContainer).setName("Highlight matching links").setDesc("Apply badge/pill styling to normal links (not embeds) that match this pattern").addToggle((toggle) => toggle.setValue(rule.highlightLinks || false).onChange(async (value) => {
+        rule.highlightLinks = value;
+        await this.plugin.saveSettings();
+        await this.plugin.updateStyles();
+        this.plugin.processExistingLinks();
+      }));
       new import_obsidian2.Setting(ruleContainer).addButton((button) => button.setButtonText("Delete rule").setWarning().onClick(async () => {
         this.plugin.settings.rules.splice(i, 1);
         await this.plugin.saveSettings();

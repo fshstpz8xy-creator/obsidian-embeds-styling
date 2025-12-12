@@ -1,0 +1,32 @@
+/* ============================================================================
+   REGEX EMBED STYLING - PLUGIN STYLES
+   Loaded automatically by Obsidian from plugin directory
+   ONLY: Colored sidebar + icon. NO OTHER STYLING.
+   ============================================================================ */
+
+/* Styled embeds - positioning for sidebar */
+.markdown-embed.regex-embed-styled {
+	position: relative;
+}
+
+/* Colored sidebar (left bar) */
+.markdown-embed.regex-embed-styled::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 4px;
+	background-color: var(--embed-sidebar-color, #666);
+	z-index: 10;
+}
+
+/* Icon in title */
+.markdown-embed.regex-embed-styled .markdown-embed-title::before {
+	content: '';
+	display: inline-block;
+	width: 1.2em;
+	height: 1.2em;
+	margin-right: 0.5em;
+	vertical-align: middle;
+}

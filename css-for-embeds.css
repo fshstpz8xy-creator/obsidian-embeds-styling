@@ -1,0 +1,79 @@
+
+
+
+/* markdown embed css  */
+.markdown-embed .markdown-embed-title {
+    /* outline: 1px solid pink; */
+    padding-bottom: 0!important;
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    padding: 0 !important;
+    /* margin-left: var(--text-indentation-guide-width); */
+}
+
+
+
+.markdown-embed {
+    /* outline: 2px solid black !important; */
+    border: none !important;
+    border-radius: 0;
+    box-sizing: border-box !important;
+    padding: 0 !important;
+
+
+}
+
+
+/* Remove padding from markdown preview inside embeds */
+.markdown-embed-content > .markdown-preview-view {
+  padding: 0 !important;
+  margin-right: 0 !important;
+  margin-left: var(--list-indent);
+}
+
+
+
+/* css */
+/* Target all levels of embeds */
+.markdown-embed,
+.markdown-embed-content,
+.markdown-embed .markdown-embed-content {
+    overflow: visible !important;
+    max-height: none !important;
+}
+/* Also check if there's a fixed max-height being applied somewhere - that would cause content to overflow and trigger scrollbars. The max-height: none should remove any height constraints. */
+
+
+ul::after{
+    bottom: 0px;
+  content: '';
+  position: absolute;
+  left: 0;
+  right: auto;
+  width: var(--list-indent);
+  height: 100%;
+
+}
+
+
+
+
+.markdown-embed::before{
+  bottom: 0px;    
+  content: '';
+  position: absolute;
+  left: 0;
+  right: auto;
+  width: var(--list-indent);
+  height: 100%;
+  background-color: var(--rule-embed-color);
+  /* color should whatever the color is for the embed  */
+  border: 2px solid black;
+  z-index: 2;
+}
+
+
+
+
+

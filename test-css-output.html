@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+/* Static CSS from styles.css */
+.markdown-embed.regex-embed-styled {
+	position: relative !important;
+}
+
+.markdown-embed.regex-embed-styled::before {
+	bottom: 0px;
+	content: '';
+	position: absolute;
+	left: 0;
+	right: auto;
+	width: 20px;
+	height: 100%;
+	border: 2px solid black;
+	z-index: 2;
+	border-radius: 0 !important;
+}
+
+/* Dynamic CSS - example */
+.markdown-embed[data-embed-rule="usc"]::before {
+	background-color: #b91c1c;
+}
+</style>
+</head>
+<body>
+<h2>Test Embed with Sidebar</h2>
+<div class="markdown-embed regex-embed-styled" data-embed-rule="usc" style="width: 300px; height: 100px; border: 1px solid gray; padding: 20px;">
+	<div>Test embed content</div>
+	<div>The red sidebar should be visible on the left</div>
+</div>
+</body>
+</html>
