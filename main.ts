@@ -67,7 +67,7 @@ const CALLOUT_DEFINITIONS: Record<string, CalloutDefinition> = {
 		color: 'var(--color-purple-rgb)',
 		label: 'Case',
 		displayName: 'Case / Precedent (Purple)',
-		icon: CALLOUT_ICONS.bookOpen
+		icon: CALLOUT_ICONS.scale
 	},
 	apply: {
 		color: 'var(--color-green-rgb)',
@@ -282,11 +282,12 @@ export default class RegexEmbedStylingPlugin extends Plugin {
 		// Write CSS to snippets folder
 		await this.updateStyles();
 
-		// Set up mutation observer to watch for embeds
+		// Set up mutation observer to watch for embeds and links
 		this.setupObserver();
 
-		// Process existing embeds
+		// Process existing embeds and links
 		this.processExistingEmbeds();
+		this.processExistingLinks();
 
 		// Add settings tab
 		this.addSettingTab(new RegexEmbedSettingTab(this.app, this));

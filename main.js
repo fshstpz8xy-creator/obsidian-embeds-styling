@@ -126,7 +126,7 @@ var CALLOUT_DEFINITIONS = {
     color: "var(--color-purple-rgb)",
     label: "Case",
     displayName: "Case / Precedent (Purple)",
-    icon: CALLOUT_ICONS.bookOpen
+    icon: CALLOUT_ICONS.scale
   },
   apply: {
     color: "var(--color-green-rgb)",
@@ -310,6 +310,7 @@ var RegexEmbedStylingPlugin = class extends import_obsidian2.Plugin {
     await this.updateStyles();
     this.setupObserver();
     this.processExistingEmbeds();
+    this.processExistingLinks();
     this.addSettingTab(new RegexEmbedSettingTab(this.app, this));
     this.addCommand({
       id: "regenerate-css",
